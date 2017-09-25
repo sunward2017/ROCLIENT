@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>ros</title>
+		<link rel="stylesheet" href="css/buildMap.css" media="screen" type="text/css" />
+		<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+		<script src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+		<script src="http://cdn.robotwebtools.org/EaselJS/current/easeljs.js"></script>
+		<script src="../build/roslib.js"></script>
+		<script src="../build/2d.js"></script>
+		<script src="../build/config.js"></script>   
+	</head>
+
+	<body>
+		<div class="map" id="map">
+			<div class="container">
+				<canvas id="canvas" width="0" height="0"></canvas>
+			</div>
+		</div>
+		<div class="panel">
+			<h3>控制面板</h3>
+			<table>
+				<tr>
+					<td>IP地址:</td>
+					<td><input type="text" id="IP" class="IP" /></td>
+					<td><button onclick="connect()">开始连接</button></td>
+				</tr>
+				<tr>
+					<td>当前状态:</td>
+					<td>
+						<div class="success"></div>
+					</td>
+					<td><button onclick="startBuildMap()" id="build">启动建图</button></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<div class="warning"></div>
+					</td>
+					<td><button onclick="saveMap()">保存地图</button></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<div class="info"></div>
+					</td>
+					<td><button onclick="stopMapping()">关闭建图</button></td>
+				</tr>
+			</table>
+			<div class="arrow" id="box">
+				<canvas width="300" height="300" id="arrow" style="position:relative"></canvas>
+			</div>
+		</div>
+
+		<script src="../build/buildMap.js"></script>
+		<script src="../build/arrow.js"></script>
+	</body>
+
+</html>

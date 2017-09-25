@@ -1,0 +1,287 @@
+html,
+body {
+	background: #47484c;
+	width: 100%;
+	height: 100%;
+	font-family: "微软雅黑";
+}
+
+body {
+	font-family: Tahoma, Arial, sans-serif;
+}
+
+.content {
+	position: relative;
+	padding-top: 50px;
+}
+
+.container {
+	position: absolute;
+}
+
+.panel.controller,
+.panel.status {
+	position: absolute;
+	top: 50px;
+	right: 60px;
+	width: 300px;
+	border: 2px solid;
+	background: #17181c;
+	color: #e4cb58;
+	-webkit-transition: 0.25s;
+	transition: 0.25s;
+	transition: 0.25s;
+}
+
+.panel.status {
+	width: 300px;
+	left: 60px;
+}
+
+#navStatus,#goalInitStatus{
+ padding-left:15px;
+ color:#fff;
+}
+.list-group-item {
+	background: #17181c;
+	border: 1px solid #e4cb58;
+}
+
+.explain {
+	font-size: 16px;
+	color: #00c1de;
+}
+
+#mapServer,
+#sonar {
+	margin: 0 5px;
+	outline: none;
+	z-index: 1000;
+}
+
+.list-group-item .mui-switch {
+	width: 42px;
+	height: 21px;
+	vertical-align: middle;
+	margin: 0;
+	position: relative;
+	background-color: #fdfdfd;
+	box-shadow: #dfdfdf 0 0 0 0 inset;
+	border-top-left-radius: 15px;
+	border-top-right-radius: 15px;
+	border-bottom-left-radius: 15px;
+	border-bottom-right-radius: 15px;
+	background-clip: content-box;
+	display: inline-block;
+	-webkit-appearance: none;
+	user-select: none;
+}
+
+.mui-switch:before {
+	content: '';
+	width: 21px;
+	height: 21px;
+	position: absolute;
+	top: 0px;
+	left: 0;
+	border-radius: 20px;
+	border-top-left-radius: 15px;
+	border-top-right-radius: 15px;
+	border-bottom-left-radius: 15px;
+	border-bottom-right-radius: 15px;
+	background-color: #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.mui-switch:checked {
+	border-color: #64bd63;
+	box-shadow: #64bd63 0 0 0 16px inset;
+	background-color: #64bd63;
+}
+
+.mui-switch:checked:before {
+	left: 21px;
+}
+
+.mui-switch.mui-switch-animbg {
+	transition: background-color ease 0.4s;
+}
+
+.mui-switch.mui-switch-animbg:before {
+	transition: left 0.3s;
+}
+
+.mui-switch.mui-switch-animbg:checked {
+	box-shadow: #dfdfdf 0 0 0 0 inset;
+	background-color: #64bd63;
+	transition: border-color 0.4s, background-color ease 0.4s;
+}
+
+.mui-switch.mui-switch-animbg:checked:before {
+	transition: left 0.3s;
+}
+
+.data {
+	margin-left: 20px;
+	color: #fff;
+}
+
+.arc {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	border-radius: 10px;
+	border: 1px solid;
+	margin-right: 15px;
+	vertical-align: middle;
+}
+
+.success {
+	color: green;
+	background: green;
+}
+
+.success.active {
+	-webkit-animation: neon3 1.5s ease-in-out infinite alternate;
+	-moz-animation: neon3 1.5s ease-in-out infinite alternate;
+	animation: neon3 1.5s ease-in-out infinite alternate;
+}
+
+.error {
+	color: red;
+	background: red;
+}
+
+.error.active {
+	-webkit-animation: neon1 1.5s ease-in-out infinite alternate;
+	-moz-animation: neon1 1.5s ease-in-out infinite alternate;
+	animation: neon1 1.5s ease-in-out infinite alternate;
+}
+
+.info {
+	color: blue;
+	background: blue;
+}
+
+.info.active {
+	-webkit-animation: neon2 1.5s ease-in-out infinite alternate;
+	-moz-animation: neon2 1.5s ease-in-out infinite alternate;
+	animation: neon2 1.5s ease-in-out infinite alternate;
+}
+
+.input-group {
+	cursor: pointer;
+}
+
+#pop {
+	width: 100px;
+	background: #20D2D4;
+	position: absolute;
+	border-radius: 4px;
+	display: none;
+}
+
+.map_list_wrapper {
+	position: absolute;
+	top: 36px;
+	width: 220px;
+	z-index: 9999;
+	display: none;
+	background: #125C8A;
+	border-radius: 3px;
+}
+
+.map_list_wrapper>div {
+	border: 1px solid;
+	border-radius: 3px;
+	overflow: hidden;
+	margin-bottom: 3px;
+}
+
+.map_list>div:hover,
+.curstom_goal:hover {
+	background-color: #F3F3F3;
+}
+
+.map-name {
+	float: left;
+	width: 220px;
+    font-size:14px;
+    font-weight: 300;
+    color:#fff;
+    height:26px;
+    line-height: 26px;
+	text-overflow: ellipsis;
+	-ms-text-autospace: ideograph-alpha;
+}
+.map-name:hover{
+	background:#ccc;
+	color:#333;
+}
+.map-edit,
+.map-del {
+	float: right;
+	width: 50px;
+	text-align: center;
+}
+
+.map-edit {
+	color: #fff;
+}
+
+.map_list_wrapper .map-del {
+	color: orange;
+}
+
+.edit-btn {
+	padding:0 15px;
+	cursor: pointer;
+}
+
+#arrow {
+	cursor: pointer
+}
+
+@-webkit-keyframes neon1 {
+	from {
+		opacity: 1;
+		box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #FF1177, 0 0 70px #FF1177, 0 0 80px #FF1177, 0 0 100px #FF1177, 0 0 150px #FF1177;
+	}
+	to {
+		opacity: 0.2;
+		box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF1177, 0 0 35px #FF1177, 0 0 40px #FF1177, 0 0 50px #FF1177,
+	}
+}
+
+@-webkit-keyframes neon2 {
+	from {
+		opacity: 1;
+		box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #228DFF, 0 0 70px #228DFF, 0 0 80px #228DFF, 0 0 100px #228DFF, 0 0 150px #228DFF;
+	}
+	to {
+		opacity: 0.2;
+		box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #228DFF, 0 0 35px #228DFF, 0 0 40px #228DFF, 0 0 50px #228DFF,
+	}
+}
+
+@-webkit-keyframes neon3 {
+	from {
+		opacity: 1;
+		box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #FFDD1B, 0 0 70px #FFDD1B, 0 0 80px #FFDD1B, 0 0 100px #FFDD1B, 0 0 150px #FFDD1B;
+	}
+	to {
+		opacity: 0.2;
+		box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FFDD1B, 0 0 35px #FFDD1B, 0 0 40px #FFDD1B, 0 0 50px #FFDD1B,
+	}
+}
+
+/***************************alert***************************************/
+#popup_container {font-family: Arial, sans-serif;font-size: 14px;min-width: 300px;max-width: 600px;background:#FFF;border:solid 2px #999;color:#000;-moz-border-radius:5px;-webkit-border-radius: 5px;border-radius: 5px;}
+#popup_title {font-size:14px;font-weight:bold;text-align:center;line-height:2em;color:#666;background: #ccc url(/images/eg/title.gif) top repeat-x;border: solid 1px #FFF;border-bottom: solid 1px #999;cursor: default;padding:0em;margin:0em auto;}
+#popup_content {background:16px 16px no-repeat url(/images/eg/info.gif);padding: 1em 1.75em;margin: 0em;}
+#popup_content.alert {background-image: url(/images/eg/info.gif);}
+#popup_content.confirm {background-image: url(/images/eg/important.gif);}
+#popup_content.prompt {background-image: url(/images/eg/help.gif);}
+#popup_message {padding-left: 48px;}
+#popup_panel {text-align: center;margin:1em 0em 0em 1em;}
+#popup_prompt {margin:.5em 0em;} 

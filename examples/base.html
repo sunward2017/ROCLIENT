@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>init</title>
+		<link rel="stylesheet" href="css/init.css" media="screen" type="text/css" />
+		<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+		<script src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+		<script src="../build/roslib.js"></script>
+	</head>
+
+	<body>
+		<div class="content">
+			<div class="container">
+				<canvas id="canvas" width="0" height="0"></canvas>
+			</div>
+		</div>
+		<div class="panel">
+			<h3>控&emsp;制&emsp;台</h3>
+			<div class="bar">
+				<div>
+					<span class="explain">地图选择:</span>
+					<select name="map" id="mapList" placeholder="地图选择" onchange="getStaticMap(this.value)"></select>
+				</div>
+				<div><span class="explain">左里程计数:</span><span class="data" id="leftEncoder">0</span> </div>
+				<div><span class="explain">右里程计数:</span><span class="data" id="rightEncoder">0</span></div>
+				<div><span class="explain">线速度:</span><span class="data" id="vx">0</span> </div>
+				<div><span class="explain">角速度:</span><span class="data" id="v">0</span></div>
+			</div>
+			<div class="box">
+				<canvas width="300" height="300" id="arrow" style="position:relative"></canvas>
+			</div>
+		</div>
+
+		<script>
+			var canvas = document.querySelector("canvas");
+			var ctx = canvas.getContext('2d');
+
+			var conW = $(".content").width(),
+				conH = $(window).height() - 120;
+			/***************************************start***************************************************************/
+			var Stage;
+			window.onresize = function() {
+				conW = $(".content").width();
+				conH = $(window).height() - 120;
+			}
+
+			var stage = function(width, height, scale, imgData) {
+				this.mapWidth = width;
+				this.mapHeight = height;
+				this.scale = scale;
+				this.imgData = imgData;
+				this.r_x = 0;
+				this.r_y = 0;
+				this.gridPnt = [];
+				this.timmer = null;
+			}
+
+			stage.prototype.updata = function(ctx) {
+					var _this = this;
+					_this.timmer = setInterval(function() {
+						var img = new Image();
+						img.src = "data:image/jpeg;base64," + _this.imgData;
+						var w = _this.mapWidth;
+						var h = _this.mapHeight;
+						img.onload = function() {
+							var imgW = this.width;
+							var imgH = this.height;
+							ctx.save();
+							ctx.scale(_this.scale, _this.scale);
+							ctx.drawImage(img, 0, 0, imgW, imgH, 0, 0, w, h);
+							ctx.beginPath();
+							ctx.arc(_this.r_x, (_this.mapHeight - _this.r_y), 4, 0, Math.PI * 2, true);
+							ctx.fillStyle = "orange";
+							ctx.closePath();
+							ctx.fill();
+							for(var i = 0, l = _this.gridPnt.length; i < l; i++) {
+								var item = _this.gridPnt[i];
+								ctx.beginPath();
+								ctx.arc(item.x, (_this.mapHeight - item.y), 2, 0, Math.PI * 2, true);
+								ctx.fillStyle = "green";
+								ctx.closePath();
+								ctx.fill();
+							}
+							ctx.restore()
+						}
+					}, 1000)
+				}
+				/***************************************************************end**************************************************************************************/
+				// Connecting to ROS
+				// -----------------
+			var ros = new ROSLIB.Ros();
+
+			// If there is an error on the backend, an 'error' emit will be emitted.
+			ros.on('error', function(error) {
+				console.log(error);
+			});
+
+			// Find out exactly when we made a connection.
+			ros.on('connection', function() {
+				console.log('Connection made!');
+			});
+
+			ros.on('close', function() {
+				console.log('Connection closed.');
+			});
+
+			// Create a connection to the rosbridge WebSocket server.
+			ros.connect('ws://192.168.10.162:9090');
+
+			cmdVel = new ROSLIB.Topic({
+				ros: ros,
+				name: '/cmd_vel',
+				messageType: 'geometry_msgs/Twist'
+			});
+
+			//Subscribing to velocity
+			//-----------------------------------------------------------------------
+			function enc() {
+				var enc = new ROSLIB.Topic({
+					ros: ros,
+					name: '/encoder',
+					messageType: 'api/Encoder'
+				});
+
+				// subscribe and show  TODO
+				enc.subscribe(function(msg) {
+					console.log('Received ' + msg.name + ': ' + 'encoder: ' + msg.leftEncoder + ',' + msg.rightEncoder + 'vel: ' + msg.vx + ',' + msg.w);
+					$("#leftEncoder").html(msg.leftEncoder);
+					$("#rightEncoder").html(msg.rightEncoder);
+					$("#vx").html(msg.vx);
+					$("#v").html(msg.w);
+				});
+			}
+			// subscribe robot location
+			//-----------------------------------------------------------------------
+			function roboloc() {
+				var roboloc = new ROSLIB.Topic({
+					ros: ros,
+					name: '/grid_pose',
+					messageType: 'api/GridPose'
+				});
+				// subscribe and show  TODO
+				roboloc.subscribe(function(msg) {
+					//console.log('Received ' + msg.name + ': ' + 'angle: ' + msg.angle + ', loc: ' + msg.grid_x + ',' + msg.grid_y);
+
+					Stage.r_x = msg.grid_x;
+					Stage.r_y = msg.grid_y;
+
+					//context.arc(x,y,5,sAngle,eAngle,counterclockwise);
+				});
+			}
+			// subscribe grid laser data
+			//-----------------------------------------------------------------------
+			function laser() {
+				var laser = new ROSLIB.Topic({
+					ros: ros,
+					name: '/grid_laser',
+					messageType: 'api/GridLaser'
+				});
+				// subscribe and show  TODO
+				laser.subscribe(function(msg) {
+					//console.log('Received ' + msg.name + ': ' + 'mapwidth: ' + msg.mapGridWidth + ', mapheight: ' + msg.mapGridHeight);
+					//console.log(msg.gridPnt.length)
+					Stage.gridPnt = msg.gridPnt;
+
+				});
+			}
+			// Calling a map_list service，获取地图列表
+			// -------------------------------------------------------------------------
+
+			//create a Service client with details of the service's name and service type.
+			function getMapList() {
+				var mapListClient = new ROSLIB.Service({
+					ros: ros,
+					name: '/map_list',
+					serviceType: 'api/MapList'
+				});
+
+				// create a Service Request. 
+				var request = new ROSLIB.ServiceRequest({
+					name: 'default'
+				});
+
+				// is a ROSLIB.ServiceResponse object.
+				mapListClient.callService(request, function(result) {
+					//console.log('Result for service call on ' + mapListClient.name + ': ' + result.mapName);
+					var mapList = result.mapName.split(';');
+					var fragmennt = "<option value='' disabled selected style='display:none;'>选择地图</option> ";
+					$.each(mapList, function(k, v) {
+						fragmennt += "<option value=\"" + v + "\">" + v + "</option>";
+					})
+					$("#mapList").html(fragmennt);
+				});
+			}
+
+			// call a static_map service from map_server获取选中的静态地图数据，方法2
+			//-----------------------------------------------------------------------
+			//create a mapClient object 
+
+			function getStaticMap(mapName) {
+				var staticMapClient = new ROSLIB.Service({
+					ros: ros,
+					name: '/get_static_map',
+					serviceType: 'std_msgs/String'
+				});
+				var request = new ROSLIB.ServiceRequest({
+					//name: 'company_map' //选中地图的名字
+					name: mapName
+				});
+				// call the map_server/static_map service
+				staticMapClient.callService(request, function(result) {
+					//console.log('Result for service call on ' + staticMapClient.name + ': ' + result.base64Data);
+					//console.log(result.base64Data)
+					if(result.base64Data) {
+						px = result.mapWidth;
+						py = result.mapHeight;
+						imgData = result.base64Data;
+						multiple = Math.min((conW / px), (conH / py));
+						canvas.width = px * multiple;
+						canvas.height = py * multiple;
+						var offsetLeft = (conW - px * multiple) / 2;
+						$(".container").css("left", offsetLeft + "px")
+						if(Stage) {
+							clearInterval(Stage.timmer)
+							Stage = null;
+						}
+						Stage = new stage(px, py, multiple, imgData);
+						roboloc();
+						laser();
+						Stage.updata(ctx);
+						enc()
+
+					} else {
+						console.log("resule is null")
+						if(Stage) {
+							clearInterval(Stage.timmer)
+							Stage = null;
+						}
+					}
+
+				});
+			}
+
+			/******************controller***************************/
+
+			getMapList();
+
+			function cmd(cx, cy) {
+				if(!cmdVel) {
+					return;
+				}
+				var cmd = new ROSLIB.Message({
+					linear: {
+						x: -cy * 0.4 / 100,
+						y: 0,
+						z: 0
+					},
+					angular: {
+						x: 0,
+						y: 0,
+						z: -cx * 0.6 / 100,
+					}
+				});
+				// publish the velocity  TODO:choose different msg
+				cmdVel.publish(cmd);
+				//getStaticMap()
+				// console.log('publish message on ' + cmdVel.name + ': ' + 'linear {'+twist.linear.x+','+twist.linear.y+','+twist.linear.z+'} angular {'+twist.angular.x+','+twist.angular.y+','+twist.angular.z+'}');
+			}
+
+			function drawMap() {
+				var w = canvas.width = px * multiple,
+					h = canvas.height = py * multiple;
+				var img = new Image();
+				img.src = "data:image/jpeg;base64," + imgData;
+				img.onload = function() {
+					var imgW = this.width;
+					var imgH = this.height;
+					ctx.drawImage(img, 0, 0, imgW, imgH, 0, 0, w, h);
+				}
+			}
+		</script>
+		<script src="../build/arrow.js"></script>
+	</body>
+
+</html>

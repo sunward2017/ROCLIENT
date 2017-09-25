@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>navgation</title>
+		<!--<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">-->
+		<link rel="stylesheet" href="css/bootstrap.css" media="screen" type="text/css" />
+		
+		<link rel="stylesheet" href="css/navigation.css" media="screen" type="text/css" />
+		<script src="../build/jq.js"></script>
+		<!--<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>-->
+		<!--<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>-->
+		<!--<script src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>-->
+		<script src="../build/bootstrap.js"></script>
+		<script src="../build/eventemitter2.js"></script>
+		<script src="../build/roslib.js"></script>
+		<script src="../build/config.js"></script>
+		<script src="../build/alert.js"></script>
+	</head>
+
+	<body>
+		<div class="content">
+			<div class="container">
+				<canvas id="canvas" width="0" height="0"></canvas>
+			</div>
+		</div>
+
+		<div class="panel panel-primary controller">
+			<div class="panel-heading text-center">
+				控&emsp;制&emsp;台
+			</div>
+			<!-- List group -->
+			<ul class="list-group">
+				<li class="list-group-item">
+					<div class="input-group input-group-sm">
+						<input type="text" class="form-control" placeholder="连接IP地址" aria-describedby="basic-addon2" id="IP">
+						<span class="input-group-addon" id="basic-addon2" onclick="conection()">连接</span>
+					</div>
+				</li>
+				<li class="list-group-item">
+					<div class="input-group input-group-sm">
+						<input type="text" class="form-control" onclick="showMaps()" readonly="true" placeholder="请选择地图" id="currentMap" />
+						<div class="map_list_wrapper" onmouseout="hideMaps()" onmouseover="showMaps()">
+						</div>
+						<span class="input-group-addon" onclick="drawStaticMap()">确定</span>
+					</div>
+				</li>
+				<li class="list-group-item">
+					<span>服务开关:</span>
+					<input class="mui-switch mui-switch-animbg" type="checkbox" id="mapServer" name="mapServer">
+					<span>声呐开关:</span>
+					<input class="mui-switch mui-switch-animbg" type="checkbox" id="sonar">
+				</li>
+
+			</ul>
+			<div>
+				<canvas width="300" height="300" id="arrow" style="position:relative"></canvas>
+			</div>
+			<ul class="list-group">
+				<li class="list-group-item">
+					<button type="button" class="btn btn-w-m btn-primary" style="width:100%" data-toggle="modal" onclick="getGoalList()">历史导航点</button>
+				</li>
+				<li class="list-group-item">	
+					<button type="button" class="btn btn-w-m btn-primary" style="width:100%" onclick="saveNavCoordination()">保存导航点</button>
+				</li>
+				<li class="list-group-item">
+					<button type="button" class="btn btn-w-m btn-primary" style="width:100%" id="pauseNav" onclick="editNavStatus(this)">暂停导航</button>
+				</li>
+				<li class="list-group-item">
+					<button type="button" class="btn btn-w-m btn-primary" style="width:100%" onclick="stopAll()">关闭服务</button>
+				</li>
+			</ul>
+
+		</div>
+		<div class="panel panel-primary status">
+			<div class="panel-heading text-center">
+				状&emsp;态&emsp;栏
+			</div>
+			<ul class="list-group">
+				<li class="list-group-item">
+					<span class="explain">连接状态:</span>
+				</li>
+				<li class="list-group-item">
+					<span>成功：</span><span class="arc success"></span>
+					<span>关闭：</span><span class="arc info"></span>
+					<span>失败：</span><span class="arc error"></span>
+				</li>
+				<li class="list-group-item">
+					<span class="explain">机器人状态:</span>
+				</li>
+				<li class="list-group-item"><span>左里程计数:</span><span class="data" id="leftEncoder">0</span> </li>
+				<li class="list-group-item"><span>右里程计数:</span><span class="data" id="rightEncoder">0</span></li>
+				<li class="list-group-item"><span>线速度:</span><span class="data" id="vx">0</span> </li>
+				<li class="list-group-item"><span>角速度:</span><span class="data" id="v">0</span></li>
+				<li class="list-group-item">
+					<span class="explain">当前导航状态:</span><span id="navStatus"></span>
+				</li>
+				<li class="list-group-item">
+					<span class="explain">导航点初始化状态:</span><span id="goalInitStatus"></span>
+				</li>
+			</ul>
+		</div>
+		<div id="pop">
+			<ul class="nav nav-pills nav-stacked">
+				<li role="presentation">
+					<a href="#" onclick="sendCustomGoal()">导航至该点</a>
+				</li>
+				<li role="presentation">
+					<a href="#" onclick="initCustomGoal()">初始化</a>
+				</li>
+				<li role="presentation">
+					<a href="#" onclick="cancel()">取&nbsp;消</a>
+				</li>
+			</ul>
+		</div>
+		<!-- 模态框（Modal） -->
+		<div class="modal fade" id="goalsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="myModalLabel">历史导航点</h4>
+					</div>
+					<div class="modal-body">
+						<table class="table">
+							<thead>
+								<tr>
+									<th style="width:40%">导航点名称</th>
+									<th>操作</th>
+								</tr>
+							</thead>
+							<tbody id="goals">
+
+							</tbody>
+						</table>
+					</div>
+
+				</div>
+			</div>
+			<!-- /.modal -->
+		</div>
+		<script src="../build/navigation.js"></script>
+		<script src="../build/arrow.js"></script>
+	</body>
+
+</html>
